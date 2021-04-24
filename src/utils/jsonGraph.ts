@@ -8,15 +8,13 @@ import { mxGraphModel } from "mxgraph"
  * let jsonStr = that.stringifyWithoutCircular(jsonNodes);
  * localStorage.setItem("json", jsonStr);
  * 
- * Decode:
+ * Encode:
  * var encoder = new mxCodec();
  * var node = encoder.encode(graph.getModel());
  * mxUtils.popup(mxUtils.getXml(node), true);
 */
 export const jsonGraph = (mx: any) => {
-  const { mxObjectCodec, mxUtils } = mx
-  const value = new Object()
-  const codec = new mxObjectCodec(value)
+  const { mxUtils } = mx
 
   const encode = (value: any) => {
     const xmlDoc = mxUtils.createXmlDocument();
@@ -28,8 +26,6 @@ export const jsonGraph = (mx: any) => {
   }
 
   const decode = (model: mxGraphModel) => {
-    console.log('keys', Object.entries(model.cells))
-
     return Object.keys(model.cells)
       .map((iCell: string) => {
         const currentCell = model.getCell(iCell);
