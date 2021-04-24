@@ -46,7 +46,7 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
     const handleGraphBtnAction = (graph: mxGraph, container: HTMLElement) => {
       const undoManager = new mxUndoManager()
       const encoder = new mxCodec();
-      const node = encoder.encode(graph.getModel());
+      const model = encoder.encode(graph.getModel());
       const parentNode = container?.parentNode
 
       const listener = (_sender: unknown, event: any) => {
@@ -73,7 +73,7 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
             window.alert('Look at your localstorage')
             localStorage.setItem(
               KEYOF_JSONGRAPH, 
-              JSON.stringify(txml.parse(mxUtils.getPrettyXml(node)))
+              JSON.stringify(txml.parse(mxUtils.getPrettyXml(model)))
             )
           })
         );
