@@ -1,10 +1,11 @@
+
+// @see: https://jgraph.github.io/mxgraph/docs/js-api
 import React, { useRef, useEffect, useCallback } from 'react'
-import Home from './components/Home'
 import ReactDOM from 'react-dom';
 import mx from './config/mxGraph'
-import { mxGraph } from 'mxgraph'
+import { mxGraph, mxGraphExportObject } from 'mxgraph'
 import './index.css';
-
+import txml from 'txml'
 interface MxContainerIProps {
   className: string;
   children?: React.ReactNode;
@@ -23,7 +24,8 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
     className,
     children,
     forwardedRef,
-    mxOnAction
+    mxOnAction,
+    ...rest
   } = props;
 
   useEffect(() => {
@@ -34,7 +36,48 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
       , mxGraph
       , mxRubberband
       , mxConstants
+      , mxUndoManager
+      , mxCodec
     } = mx
+
+
+    const handleGraphBtnAction = (graph: mxGraph, container: HTMLElement) => {
+      const undoManager = new mxUndoManager()
+      const encoder = new mxCodec();
+      const node = encoder.encode(graph.getModel());
+
+      const listener = (_sender: unknown, event: any) => {
+        undoManager.undoableEditHappened(event.getProperty('edit'))
+      }
+      graph.getModel().addListener(mxEvent.UNDO, listener)
+      graph.getView().addListener(mxEvent.UNDO, listener)
+
+      const parentNode = container?.parentNode
+
+      if (parentNode) {
+        parentNode.appendChild(
+          mxUtils.button("undo", function () {
+            undoManager.undo();
+          })
+        );
+
+        parentNode.appendChild(
+          mxUtils.button("redo", function () {
+            undoManager.redo();
+          })
+        );
+
+        parentNode.appendChild(
+          mxUtils.button("View JSON", function () {
+            window.alert('Look at your localstorage')
+            localStorage.setItem(
+              'jsonGraph', 
+              JSON.stringify(txml.parse(mxUtils.getPrettyXml(node)))
+            )
+          })
+        );
+      }
+    }
 
     if (!mxClient.isBrowserSupported()) {
       mxUtils.error("Browser is not supported!", 200, false)
@@ -57,23 +100,24 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
         new mxRubberband(graph);
 
         // Enables tooltips, new connections and panning
-        // graph.setTooltips(true);
-        // graph.setAllowDanglingEdges(false);
-        // graph.gridSize = 30;
-        // graph.centerZoom = true;
-        // graph.autoSizeCellsOnAdd = true;
+        graph.setConnectable(true)
+        graph.setTooltips(true);
+        graph.setAllowDanglingEdges(false);
 
         // Add another global context here
         //...
+
+        handleGraphBtnAction(graph, container)
+
+        if (newGraph) mxOnAction(newGraph);
       }
 
-      if (newGraph) mxOnAction(newGraph);
       return;
     }
-  }, [])
+  }, [forwardedRef, mxOnAction])
 
   return (
-    <div {...props} className={`mxContainer ${className}`} ref={forwardedRef}>
+    <div {...rest} className={`mxContainer ${className}`} ref={forwardedRef}>
       {children || null}
     </div>
   )
@@ -82,20 +126,21 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
 function App() {
   const ref = useRef(null)
 
-  const setGraphStyle = useCallback((graph: mxGraph) => {
-    const { mxConstants } = mx
+  const setGraphStyle = useCallback((mxGraphObj: mxGraphExportObject, graph: mxGraph) => {
+    const { mxConstants, mxUtils } = mxGraphObj
 
-    let style: any = []
-    style[mxConstants.HANDLE_FILLCOLOR] = "#0000";
-    graph.getStylesheet().putCellStyle('bottom', style)
+    let style: any = {}
 
-    return style
+    graph.getStylesheet().putCellStyle('html', style);
+
+    style = mxUtils.clone(style)
+    style[mxConstants.STYLE_ROUNDED] = false
+    style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_BOTTOM
+    graph.getStylesheet().putCellStyle('css', style);
   }, [])
 
   const handleMxAction = useCallback((graph: mxGraph) => {
-    const { mxGraph, mxRectangle } = mx
-
-    setGraphStyle(graph)
+    setGraphStyle(mx, graph)
 
     // Gets the default parent for inserting new cells. This is normally the first
     // child of the root (ie. layer 0).
@@ -106,22 +151,22 @@ function App() {
     graph.getModel().beginUpdate()
 
     try {
-      const v1 = graph.insertVertex(parent, 'bottom', 'Hello', 20, 20, 80, 30, 'bottom')
-      const v2 = graph.insertVertex(parent, null, "World", 200, 150, 80, 30);
-      const e1 = graph.insertEdge(parent, null, '', v1, v2);
+      let v1 = graph.insertVertex(parent, null, 'HTML5', 20, 20, 80, 30, 'html')
+      let v2 = graph.insertVertex(parent, null, "CSS3", 200, 150, 80, 30, 'css');
+      let e1 = graph.insertEdge(parent, null, '', v1, v2, '');
     } finally {
       // Updates the display
       graph.getModel().endUpdate()
     }
 
-  }, [])
+  }, [setGraphStyle])
 
   return (
     <div className="App">
-      <h1 style={{ textAlign: 'center' }}>React Mx Graph</h1>
+      {/* <h1 style={{ textAlign: 'center' }}>Frontend Roadmap | React Mx Graph</h1> */}
 
       <MxContainer
-        className="mxContainerFirst"
+        className="graphInHome"
         forwardedRef={ref}
         mxOnAction={handleMxAction}
       />
