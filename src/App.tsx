@@ -1,9 +1,25 @@
 
+/**
+ * 
+ * @issues (fixed)
+ * Image doesn't show, 
+ * 
+ * If you want to use STYLE_IMAGE/STYLE_IMAGE_BACKGROUND, you must add this first
+ * style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+ * 
+ * I don't know why mxImageBasePath doesn't work
+ * mxImageBasePath: "assets/img",
+*/
 import { useRef, useCallback } from 'react'
 import mx from './config/mxGraph'
 import { mxGraph, mxGraphExportObject } from 'mxgraph'
 import './index.css';
 import MxGraph from './components/mxgraph'
+
+const imgPath = {
+  html: 'assets/img/html5.png',
+  css: 'assets/img/css3.png',
+}
 
 function App() {
   const ref = useRef(null)
@@ -12,11 +28,20 @@ function App() {
     const { mxConstants, mxUtils } = mxGraphObj
 
     let style: any = {}
-    style[mxConstants.STYLE_ROUNDED] = true
+    style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_IMAGE;
+    style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+    style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+    style[mxConstants.STYLE_IMAGE_ALIGN] = mxConstants.ALIGN_CENTER;
+    style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_TOP;
+    style[mxConstants.STYLE_IMAGE] = imgPath.html
+    style[mxConstants.STYLE_IMAGE_WIDTH] = '48';
+    style[mxConstants.STYLE_IMAGE_HEIGHT] = '48';
+    style[mxConstants.STYLE_SPACING_TOP] = '56';
+    style[mxConstants.STYLE_SPACING] = '8';
     graph.getStylesheet().putCellStyle('html', style);
 
     style = mxUtils.clone(style)
-    style[mxConstants.STYLE_ROUNDED] = false
+    style[mxConstants.STYLE_IMAGE] = imgPath.css
     style[mxConstants.STYLE_IMAGE_VERTICAL_ALIGN] = mxConstants.ALIGN_BOTTOM
     graph.getStylesheet().putCellStyle('css', style);
   }, [])

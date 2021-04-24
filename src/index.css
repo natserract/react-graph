@@ -22,7 +22,7 @@ code {
   bottom: 0px;
   height: 90%;
   background-color: rgb(255, 255, 255);
-  background-image: url("assets/img/grid.gif");
+  background-image: url("grid.gif");
 }
 
 .graphInHome {

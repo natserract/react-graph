@@ -43,19 +43,17 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
       , mxCodec
     } = mx
 
-
     const handleGraphBtnAction = (graph: mxGraph, container: HTMLElement) => {
       const undoManager = new mxUndoManager()
       const encoder = new mxCodec();
       const node = encoder.encode(graph.getModel());
+      const parentNode = container?.parentNode
 
       const listener = (_sender: unknown, event: any) => {
         undoManager.undoableEditHappened(event.getProperty('edit'))
       }
       graph.getModel().addListener(mxEvent.UNDO, listener)
       graph.getView().addListener(mxEvent.UNDO, listener)
-
-      const parentNode = container?.parentNode
 
       if (parentNode) {
         parentNode.appendChild(
