@@ -22,7 +22,7 @@ type JSXAttrProps = (
 
 const KEYOF_JSONGRAPH = 'jsonGraph'
 
-const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
+const MxGraph = (props: MxContainerIProps & JSXAttrProps) => {
   const {
     className,
     children,
@@ -128,4 +128,4 @@ const MxContainer = (props: MxContainerIProps & JSXAttrProps) => {
   )
 }
 
-export default MxContainer
+export default MxGraph
