@@ -11,3 +11,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* MX GRAPH */
+.mxContainer {
+  margin: 0 50px;
+  position: absolute;
+  left: 0;
+  top: 50px;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(255, 255, 255);
+  background-image: url("assets/img/grid.gif");
+}
